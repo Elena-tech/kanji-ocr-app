@@ -11,8 +11,8 @@ Flask>=3.0.0                 # Lightweight web framework
 # Pillow>=10.0.0             # Image manipulation and preprocessing
 # numpy>=1.24.0              # Numerical operations for image arrays
 
-# API and Networking (TODO: Install when integrating dictionary API)
-# requests>=2.31.0           # HTTP library for API calls
+# API and Networking
+requests>=2.31.0             # HTTP library for Jisho API calls
 
 # Utilities
 python-dotenv>=1.0.0         # Environment variable management

@@ -6,9 +6,25 @@ from flask import Blueprint, render_template, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+import requests
+from typing import Dict, Optional, List
 
 bp = Blueprint('main', __name__)
+
+# ============================================================
+# Configuration Constants
+# ============================================================
+
+# Jisho API configuration
+JISHO_API_BASE_URL = 'https://jisho.org/api/v1/search/words'
+JISHO_API_TIMEOUT = 10  # seconds
+JISHO_MAX_RESULTS = 5  # Maximum number of results to process
+
+# Cache configuration
+CACHE_TTL_SECONDS = 3600  # 1 hour cache TTL
+dictionary_cache: Dict[str, dict] = {}  # In-memory cache
+cache_timestamps: Dict[str, datetime] = {}  # Cache expiry tracking
 
 
 def allowed_file(filename):
@@ -96,25 +112,28 @@ def upload_image():
 @bp.route('/api/lookup/<kanji>', methods=['GET'])
 def lookup_kanji(kanji):
     """
-    Look up dictionary information for a kanji character
+    Look up dictionary information for a kanji character using Jisho API
 
     Args:
-        kanji: The kanji character to look up
+        kanji: The kanji character or word to look up
 
-    Returns: JSON with dictionary information
-
-    TODO: Integrate real dictionary API (Jisho or JMDict)
+    Returns: JSON with dictionary information from Jisho API
     """
     try:
-        # TODO: Call real dictionary API
-        # For now, return stubbed data
-        dictionary_data = get_dictionary_stub(kanji)
+        # Fetch dictionary data from Jisho API (with caching)
+        dictionary_data = fetch_jisho_dictionary(kanji)
 
-        return jsonify({
-            'success': True,
-            'kanji': kanji,
-            'data': dictionary_data
-        })
+        if dictionary_data:
+            return jsonify({
+                'success': True,
+                'kanji': kanji,
+                'data': dictionary_data
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'No dictionary entry found for this character'
+            }), 404
 
     except Exception as e:
         current_app.logger.error(f"Error looking up kanji {kanji}: {str(e)}")
@@ -167,68 +186,163 @@ def perform_ocr_stub(filepath):
     }
 
 
-def get_dictionary_stub(kanji):
+def is_cache_valid(kanji: str) -> bool:
     """
-    Stub function for dictionary lookup
-
-    TODO: Replace with real dictionary API integration
-    - Option 1: Jisho API (https://jisho.org/api/v1/search/words?keyword={kanji})
-    - Option 2: Local JMDict database
-    - Include: meanings, readings (kun-yomi, on-yomi), JLPT level, examples
+    Check if cached entry is still valid based on TTL
 
     Args:
-        kanji: The kanji character to look up
+        kanji: The kanji to check
 
     Returns:
-        Dictionary information for the kanji
+        True if cache is valid, False otherwise
     """
-    # Stubbed dictionary data
-    stub_data = {
-        '日': {
-            'meanings': ['sun', 'day'],
-            'kun_reading': 'ひ, か',
-            'on_reading': 'ニチ, ジツ',
-            'jlpt_level': 'N5',
-            'stroke_count': 4,
-            'examples': [
-                {'word': '日本', 'reading': 'にほん', 'meaning': 'Japan'},
-                {'word': '毎日', 'reading': 'まいにち', 'meaning': 'every day'}
-            ]
-        },
-        '本': {
-            'meanings': ['book', 'origin', 'main'],
-            'kun_reading': 'もと',
-            'on_reading': 'ホン',
-            'jlpt_level': 'N5',
-            'stroke_count': 5,
-            'examples': [
-                {'word': '日本', 'reading': 'にほん', 'meaning': 'Japan'},
-                {'word': '本当', 'reading': 'ほんとう', 'meaning': 'truth, really'}
-            ]
-        },
-        '語': {
-            'meanings': ['language', 'word'],
-            'kun_reading': 'かたる, かたらう',
-            'on_reading': 'ゴ',
-            'jlpt_level': 'N4',
-            'stroke_count': 14,
-            'examples': [
-                {'word': '日本語', 'reading': 'にほんご', 'meaning': 'Japanese language'},
-                {'word': '英語', 'reading': 'えいご', 'meaning': 'English language'}
-            ]
-        }
-    }
+    if kanji not in cache_timestamps:
+        return False
 
-    # Return stub data for known kanji, or generic data for unknown
-    if kanji in stub_data:
-        return stub_data[kanji]
-    else:
-        return {
-            'meanings': ['(Dictionary lookup pending)'],
-            'kun_reading': '—',
-            'on_reading': '—',
-            'jlpt_level': 'Unknown',
-            'stroke_count': 0,
-            'examples': [],
-            'note': 'This is stubbed dictionary data. Real API integration pending.'
-        }
+    expiry_time = cache_timestamps[kanji] + timedelta(seconds=CACHE_TTL_SECONDS)
+    return datetime.now() < expiry_time
+
+
+def fetch_jisho_dictionary(kanji: str) -> Optional[Dict]:
+    """
+    Fetch dictionary information from Jisho API with caching
+
+    Args:
+        kanji: The kanji character or word to look up
+
+    Returns:
+        Dictionary information in standardized format, or None if not found
+    """
+    # Check cache first
+    if kanji in dictionary_cache and is_cache_valid(kanji):
+        current_app.logger.info(f"Cache hit for kanji: {kanji}")
+        return dictionary_cache[kanji]
+
+    # Cache miss or expired - fetch from API
+    current_app.logger.info(f"Cache miss for kanji: {kanji}, fetching from Jisho API")
+
+    try:
+        # Call Jisho API
+        response = requests.get(
+            JISHO_API_BASE_URL,
+            params={'keyword': kanji},
+            timeout=JISHO_API_TIMEOUT
+        )
+        response.raise_for_status()
+
+        data = response.json()
+
+        # Parse and format the response
+        formatted_data = parse_jisho_response(data, kanji)
+
+        if formatted_data:
+            # Cache the result
+            dictionary_cache[kanji] = formatted_data
+            cache_timestamps[kanji] = datetime.now()
+            current_app.logger.info(f"Cached dictionary data for: {kanji}")
+
+        return formatted_data
+
+    except requests.exceptions.Timeout:
+        current_app.logger.error(f"Jisho API timeout for kanji: {kanji}")
+        return None
+    except requests.exceptions.RequestException as e:
+        current_app.logger.error(f"Jisho API request error for {kanji}: {str(e)}")
+        return None
+    except Exception as e:
+        current_app.logger.error(f"Unexpected error fetching dictionary for {kanji}: {str(e)}")
+        return None
+
+
+def parse_jisho_response(api_response: Dict, search_term: str) -> Optional[Dict]:
+    """
+    Parse Jisho API response into standardized format
+
+    Args:
+        api_response: Raw JSON response from Jisho API
+        search_term: The original search term
+
+    Returns:
+        Formatted dictionary data matching frontend expectations
+    """
+    if not api_response.get('data') or len(api_response['data']) == 0:
+        return None
+
+    # Get the first (most relevant) result
+    primary_result = api_response['data'][0]
+
+    # Extract Japanese readings
+    japanese_data = primary_result.get('japanese', [{}])[0]
+    word = japanese_data.get('word', search_term)
+    reading = japanese_data.get('reading', '')
+
+    # Extract senses (meanings)
+    senses = primary_result.get('senses', [])
+    meanings = []
+    parts_of_speech = []
+
+    for sense in senses:
+        # Get English definitions
+        definitions = sense.get('english_definitions', [])
+        meanings.extend(definitions)
+
+        # Get parts of speech
+        pos = sense.get('parts_of_speech', [])
+        parts_of_speech.extend(pos)
+
+    # Remove duplicates while preserving order
+    meanings = list(dict.fromkeys(meanings))
+    parts_of_speech = list(dict.fromkeys(parts_of_speech))
+
+    # Extract JLPT level from tags
+    jlpt_level = 'Unknown'
+    tags = primary_result.get('tags', [])
+    for tag in tags:
+        if tag.startswith('JLPT N'):
+            jlpt_level = tag.replace('JLPT ', '')
+            break
+
+    # Check for common tags
+    is_common = primary_result.get('is_common', False)
+
+    # Extract kun and on readings (if available in tags or other fields)
+    # Note: Jisho API doesn't always separate kun/on readings explicitly
+    # We'll use the reading field as a general reading
+    kun_reading = reading if reading else '—'
+    on_reading = '—'  # Jisho doesn't separate this clearly in API
+
+    # Build examples from additional results
+    examples = []
+    for i, result in enumerate(api_response['data'][:JISHO_MAX_RESULTS]):
+        if i == 0:
+            continue  # Skip the primary result
+
+        jp = result.get('japanese', [{}])[0]
+        example_word = jp.get('word', '')
+        example_reading = jp.get('reading', '')
+
+        if example_word and example_word != word:
+            # Get first meaning from senses
+            example_senses = result.get('senses', [])
+            example_meaning = ''
+            if example_senses and example_senses[0].get('english_definitions'):
+                example_meaning = example_senses[0]['english_definitions'][0]
+
+            examples.append({
+                'word': example_word,
+                'reading': example_reading,
+                'meaning': example_meaning
+            })
+
+    # Format the final response to match frontend expectations
+    return {
+        'meanings': meanings[:10],  # Limit to 10 meanings
+        'kun_reading': kun_reading,
+        'on_reading': on_reading,
+        'jlpt_level': jlpt_level,
+        'parts_of_speech': ', '.join(parts_of_speech[:5]),  # Limit to 5
+        'is_common': is_common,
+        'stroke_count': 0,  # Jisho API doesn't provide stroke count
+        'examples': examples[:5],  # Limit to 5 examples
+        'source': 'Jisho.org API'
+    }
