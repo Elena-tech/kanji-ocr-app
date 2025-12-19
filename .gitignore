@@ -58,6 +58,14 @@ data/
 *.sqlite
 *.sqlite3
 
+# Uploads
+uploads/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+
 # API keys and secrets
 .env
 secrets.json

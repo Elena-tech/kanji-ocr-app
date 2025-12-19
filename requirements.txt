@@ -1,20 +1,19 @@
 # Kanji OCR Camera Application - Python Dependencies
 
-# OCR Engine
-pytesseract>=0.3.10          # Tesseract OCR wrapper for Python
+# Web Framework
+Flask>=3.0.0                 # Lightweight web framework
 
-# Image Processing
-opencv-python>=4.8.0         # Computer vision and camera capture
-Pillow>=10.0.0               # Image manipulation and preprocessing
-numpy>=1.24.0                # Numerical operations for image arrays
+# OCR Engine (TODO: Install when ready for real OCR)
+# pytesseract>=0.3.10        # Tesseract OCR wrapper for Python
 
-# GUI Framework (choose one based on user preference)
-# PyQt6>=6.5.0               # Modern Qt bindings (recommended)
-# tkinter is built-in with Python - no installation needed
+# Image Processing (TODO: Install when implementing real OCR)
+# opencv-python>=4.8.0       # Computer vision and image processing
+# Pillow>=10.0.0             # Image manipulation and preprocessing
+# numpy>=1.24.0              # Numerical operations for image arrays
 
-# API and Networking
-requests>=2.31.0             # HTTP library for API calls
-beautifulsoup4>=4.12.0       # HTML parsing (if needed for web scraping)
+# API and Networking (TODO: Install when integrating dictionary API)
+# requests>=2.31.0           # HTTP library for API calls
 
 # Utilities
 python-dotenv>=1.0.0         # Environment variable management
+Werkzeug>=3.0.0              # WSGI utilities (comes with Flask)

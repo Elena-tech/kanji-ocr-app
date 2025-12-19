@@ -1,273 +1,277 @@
 # Kanji OCR Camera Application
 
-A smart application that recognizes Japanese kanji characters from camera images and provides instant dictionary lookups with meanings, readings, and usage examples.
+A production-ready web application that recognizes Japanese kanji characters from uploaded images and provides instant dictionary lookups with meanings, readings, and usage examples.
 
-## Project Overview
+🚀 **Status:** MVP Complete - Ready for local testing
 
-This application aims to help Japanese language learners and readers by:
-- Capturing images of Japanese text using device camera
-- Recognizing kanji characters using OCR technology
-- Looking up character meanings, readings (kun-yomi and on-yomi), and example words
-- Providing an intuitive interface for quick kanji identification
+## Features
 
-## Tech Stack Options
+- 📸 **Image Upload** - Drag & drop or select images for OCR processing
+- 🔍 **Kanji Recognition** - OCR processing with confidence scores (stubbed, ready for Tesseract integration)
+- 📖 **Dictionary Lookup** - Instant kanji definitions with readings and examples
+- 🎨 **Clean UI** - Responsive, modern interface built with vanilla JavaScript
+- ⚡ **Lightweight** - No heavy frameworks, fast loading times
 
-### Option 1: Mobile App (React Native) - **RECOMMENDED**
-**Best for:** Portable learning, real-world kanji recognition
+## Tech Stack
 
-**Pros:**
-- Native camera access on iOS and Android
-- Portable - use anywhere (restaurants, books, signs, etc.)
-- Single codebase for both platforms
-- Large ecosystem of libraries
+### Backend
+- **Flask 3.0+** - Lightweight Python web framework
+- **Python 3.11+** - Modern Python with type hints
+- **Future:** Tesseract OCR for real kanji recognition
 
-**Tech Stack:**
-- **Frontend:** React Native + Expo
-- **OCR Engine:** Google ML Kit Vision API or Tesseract.js
-- **Dictionary API:** Jisho API or JMDict database
-- **Language:** JavaScript/TypeScript
-- **Camera:** expo-camera
-- **Storage:** AsyncStorage for history
+### Frontend
+- **Vanilla HTML/CSS/JavaScript** - No frameworks, pure web technologies
+- **Responsive Design** - Works on desktop, tablet, and mobile
+- **Future:** getUserMedia API for camera capture
 
-**Estimated Complexity:** Medium
+### APIs & Services (Planned)
+- **Jisho API** - Japanese dictionary lookups
+- **Tesseract OCR** - Japanese character recognition with jpn.traineddata
 
----
-
-### Option 2: Web Application (Progressive Web App)
-**Best for:** Cross-platform accessibility, no installation required
-
-**Pros:**
-- Works on any device with a browser
-- No app store approval needed
-- Easy to update and maintain
-- Can be installed as PWA
-
-**Tech Stack:**
-- **Frontend:** React or Vue.js
-- **OCR Engine:** Tesseract.js
-- **Dictionary API:** Jisho API
-- **Language:** JavaScript/TypeScript
-- **Camera:** MediaDevices API (getUserMedia)
-- **Storage:** IndexedDB for offline support
-
-**Estimated Complexity:** Medium-Low
-
----
-
-### Option 3: Desktop Application (Python + GUI)
-**Best for:** Integration with desktop workflows, local processing
-
-**Pros:**
-- Fast local processing
-- No internet required for OCR (if using local models)
-- Easy to integrate with existing Python tools
-- Good for development and prototyping
-
-**Tech Stack:**
-- **GUI Framework:** PyQt6 or Tkinter
-- **OCR Engine:** Tesseract (pytesseract) with Japanese language pack
-- **Dictionary:** Local JMDict database or Jisho API
-- **Language:** Python 3.11+
-- **Camera:** OpenCV (cv2)
-- **Image Processing:** Pillow (PIL)
-
-**Estimated Complexity:** Medium
-
----
-
-### Option 4: Cross-Platform Desktop App (Electron)
-**Best for:** Desktop users wanting native app experience
-
-**Pros:**
-- Native desktop feel with web technologies
-- Cross-platform (Windows, macOS, Linux)
-- Rich UI capabilities
-- Large ecosystem
-
-**Tech Stack:**
-- **Framework:** Electron
-- **Frontend:** React/Vue
-- **OCR Engine:** Tesseract.js
-- **Dictionary API:** Jisho API
-- **Language:** JavaScript/TypeScript
-- **Camera:** WebRTC
-
-**Estimated Complexity:** Medium-High
-
-## Recommended Approach: Python Desktop MVP
-
-For rapid development and proof of concept, I recommend starting with **Option 3 (Python Desktop Application)**:
-
-### Why Python First?
-1. **Fastest to implement** - Quick prototyping and iteration
-2. **Excellent OCR libraries** - Tesseract is mature and well-documented
-3. **Easy testing** - Can validate OCR accuracy before committing to platform
-4. **Low barrier to entry** - Pure Python, no app store requirements
-5. **Path to migration** - Can later port to mobile/web once proven
-
-## Proposed Repository Structure
+## Project Structure
 
 ```
 kanji-ocr-app/
-├── README.md                 # This file
-├── .gitignore               # Python, IDE, OS files
+├── app/                      # Flask application
+│   ├── __init__.py          # Application factory
+│   ├── routes.py            # API routes and view handlers
+│   ├── static/              # Static assets
+│   │   ├── css/
+│   │   │   └── styles.css   # Application styles
+│   │   ├── js/
+│   │   │   └── main.js      # Frontend JavaScript
+│   │   └── images/          # Static images
+│   └── templates/
+│       └── index.html       # Main application page
+├── uploads/                  # Uploaded images (gitignored)
+├── run.py                   # Development server entry point
 ├── requirements.txt         # Python dependencies
-├── LICENSE                  # MIT License
-├── docs/                    # Documentation
-│   ├── setup.md            # Setup instructions
-│   ├── usage.md            # User guide
-│   └── api.md              # API documentation
-├── src/                     # Source code
-│   ├── __init__.py
-│   ├── main.py             # Application entry point
-│   ├── gui/                # GUI components
-│   │   ├── __init__.py
-│   │   ├── main_window.py  # Main application window
-│   │   ├── camera_view.py  # Camera capture interface
-│   │   └── result_view.py  # OCR results display
-│   ├── ocr/                # OCR processing
-│   │   ├── __init__.py
-│   │   ├── processor.py    # OCR processing logic
-│   │   └── preprocessor.py # Image preprocessing
-│   ├── dictionary/         # Dictionary lookup
-│   │   ├── __init__.py
-│   │   ├── jisho_api.py   # Jisho API client
-│   │   └── cache.py       # Cache for lookups
-│   └── utils/              # Utilities
-│       ├── __init__.py
-│       ├── config.py       # Configuration
-│       └── logger.py       # Logging setup
-├── tests/                   # Unit tests
-│   ├── __init__.py
-│   ├── test_ocr.py
-│   └── test_dictionary.py
-├── assets/                  # Application assets
-│   ├── icons/
-│   └── sample_images/      # Test images
-└── scripts/                 # Utility scripts
-    ├── install_tesseract.sh
-    └── download_language_pack.sh
+├── .env.example             # Environment variables template
+└── README.md                # This file
 ```
 
-## Implementation Plan
+## Quick Start
 
-### Phase 1: Core OCR Functionality (Week 1)
-- [x] Set up project structure
-- [ ] Install and configure Tesseract OCR
-- [ ] Implement basic image capture/upload
-- [ ] Implement OCR processing for Japanese text
-- [ ] Create simple CLI interface for testing
+### Prerequisites
 
-### Phase 2: GUI Development (Week 2)
-- [ ] Design main application window
-- [ ] Implement camera view with capture button
-- [ ] Add image preview and crop functionality
-- [ ] Display OCR results with character highlighting
+- Python 3.11 or higher
+- pip (Python package manager)
 
-### Phase 3: Dictionary Integration (Week 3)
-- [ ] Integrate Jisho API or JMDict database
-- [ ] Implement kanji lookup functionality
-- [ ] Display meanings, readings, and stroke order
-- [ ] Add cache for offline/fast lookups
+### Installation
 
-### Phase 4: Enhancement & Polish (Week 4)
-- [ ] Add search history
-- [ ] Implement favorites/saved kanji list
-- [ ] Add export functionality (Anki, CSV)
-- [ ] Improve OCR accuracy with preprocessing
-- [ ] Add error handling and user feedback
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Elena-tech/kanji-ocr-app.git
+   cd kanji-ocr-app
+   ```
 
-### Phase 5: Optional - Platform Migration
-- [ ] Evaluate user feedback
-- [ ] Consider mobile app (React Native)
-- [ ] Or web app (PWA) version
-- [ ] Maintain feature parity
+2. **Create virtual environment**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-## Key Dependencies
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### Python Desktop Version
-```
-pytesseract>=0.3.10          # OCR engine wrapper
-opencv-python>=4.8.0         # Image capture and processing
-Pillow>=10.0.0               # Image manipulation
-PyQt6>=6.5.0                 # GUI framework (or tkinter - built-in)
-requests>=2.31.0             # API calls to Jisho
-beautifulsoup4>=4.12.0       # HTML parsing if needed
+4. **Set up environment variables** (optional)
+   ```bash
+   cp .env.example .env
+   # Edit .env if needed
+   ```
+
+### Running the Application
+
+**Option 1: Using Flask CLI (Recommended)**
+```bash
+flask run
 ```
 
-### System Requirements
-- **Tesseract OCR** 5.0+ with Japanese language pack (jpn.traineddata)
-- **Python** 3.11+
-- **Camera** or ability to upload images
+**Option 2: Using Python directly**
+```bash
+python run.py
+```
 
-## Data Sources
+The application will start on **http://127.0.0.1:5000**
 
-### OCR Engine
-- **Tesseract OCR**: Open-source, supports Japanese (jpn, jpn_vert)
-  - Download: https://github.com/tesseract-ocr/tesseract
-  - Language packs: https://github.com/tesseract-ocr/tessdata
+Open your browser and navigate to the URL to use the application.
 
-### Dictionary APIs
-1. **Jisho API** (Recommended)
-   - Free, no API key required
-   - Endpoint: `https://jisho.org/api/v1/search/words?keyword={kanji}`
-   - Rich data: meanings, readings, JLPT level, frequency
+## API Endpoints
 
-2. **JMDict** (Alternative - Offline)
-   - Free, downloadable XML/JSON
-   - Comprehensive Japanese-English dictionary
-   - Requires local database setup
+### Main Routes
 
-3. **Kanji Alive API**
-   - Kanji details including stroke order
-   - Free with attribution
+- **GET /** - Main application page
+- **GET /health** - Health check endpoint (returns JSON status)
 
-## Questions for User Decision
+### OCR & Dictionary API
 
-Before we proceed with implementation, please decide:
+- **POST /api/upload** - Upload image for OCR processing
+  - Accepts: multipart/form-data with 'image' file
+  - Returns: JSON with OCR results
+  - Max file size: 16MB
+  - Allowed formats: PNG, JPG, JPEG, GIF, WebP
 
-### 1. Platform Preference
-- **A) Desktop App (Python)** - Fastest development, great for MVP ✓ RECOMMENDED
-- **B) Mobile App (React Native)** - Most practical for real-world use
-- **C) Web App (PWA)** - Most accessible, works everywhere
-- **D) Cross-platform Electron** - Desktop with web tech
+- **GET /api/lookup/{kanji}** - Look up kanji in dictionary
+  - Returns: JSON with meanings, readings, examples
+  - Currently stubbed - real API integration pending
 
-### 2. Dictionary Preference
-- **A) Jisho API** - Online, rich data, requires internet ✓ RECOMMENDED
-- **B) JMDict Local** - Offline, requires setup
-- **C) Both** - Best of both worlds
+## Current Implementation Status
 
-### 3. Advanced Features (Priority)
-Which features are most important?
-- **A) Accuracy** - Best OCR recognition, even if slower
-- **B) Speed** - Fast recognition, acceptable accuracy
-- **C) Offline capability** - Works without internet
-- **D) Learning tools** - Flashcards, history, export to Anki
+### ✅ Completed
 
-### 4. User Experience
-- **A) Simple** - Just show kanji and meaning
-- **B) Detailed** - Include readings, examples, stroke order, JLPT level
-- **C) Educational** - Add study features, quizzes, progress tracking
+- [x] Flask backend with application factory pattern
+- [x] File upload handling with validation
+- [x] RESTful API structure
+- [x] Responsive frontend UI with drag-and-drop
+- [x] Image preview and processing workflow
+- [x] OCR results display with character cards
+- [x] Dictionary lookup interface
+- [x] Error handling and user feedback
+- [x] Loading states and animations
+- [x] Project structure and organization
 
-## Next Steps
+### 🚧 Using Stubs (TODOs)
 
-1. **User decides on platform and features** (see questions above)
-2. **Set up development environment** (install Tesseract, Python dependencies)
-3. **Create initial prototype** with basic OCR
-4. **Iterate based on testing** and user feedback
-5. **Add dictionary integration**
-6. **Polish and deploy**
+- [ ] **Real OCR Integration** - Currently using stubbed data
+  - TODO: Install Tesseract OCR
+  - TODO: Install pytesseract Python wrapper
+  - TODO: Download Japanese language pack (jpn.traineddata)
+  - TODO: Implement image preprocessing
+  - TODO: Integrate OCR processing in `routes.py:perform_ocr_stub()`
+
+- [ ] **Dictionary API Integration** - Currently using stubbed data
+  - TODO: Integrate Jisho API or JMDict
+  - TODO: Add API rate limiting
+  - TODO: Implement caching for lookups
+  - TODO: Replace stub in `routes.py:get_dictionary_stub()`
+
+### 🔮 Future Enhancements
+
+- [ ] Camera capture using getUserMedia API
+- [ ] Image cropping/editing before OCR
+- [ ] OCR result editing (correct mistakes)
+- [ ] Search history and favorites
+- [ ] Export functionality (Anki, CSV)
+- [ ] Offline support with Service Worker (PWA)
+- [ ] User accounts and cloud sync
+- [ ] Mobile app version (React Native)
+- [ ] Stroke order diagrams
+- [ ] Example sentences with audio
+
+## Development
+
+### Adding Real OCR Support
+
+1. **Install Tesseract OCR**
+   ```bash
+   # macOS
+   brew install tesseract tesseract-lang
+
+   # Ubuntu/Debian
+   sudo apt-get install tesseract-ocr tesseract-ocr-jpn
+
+   # Windows
+   # Download from: https://github.com/UB-Mannheim/tesseract/wiki
+   ```
+
+2. **Uncomment OCR dependencies in requirements.txt**
+   ```bash
+   pip install pytesseract Pillow opencv-python numpy
+   ```
+
+3. **Update `app/routes.py`**
+   - Replace `perform_ocr_stub()` with real Tesseract implementation
+   - Add image preprocessing (grayscale, contrast enhancement)
+   - Configure Tesseract for Japanese (jpn mode)
+
+### Adding Dictionary API
+
+1. **Uncomment requests in requirements.txt**
+   ```bash
+   pip install requests
+   ```
+
+2. **Update `app/routes.py`**
+   - Replace `get_dictionary_stub()` with Jisho API calls
+   - Add caching to reduce API calls
+   - Handle API errors gracefully
+
+## Testing
+
+### Manual Testing
+
+1. Start the application
+2. Upload a test image (or use sample images)
+3. Verify OCR results display (currently stubbed)
+4. Click on kanji characters to see dictionary info
+5. Check error handling with invalid files
+
+### API Testing
+
+```bash
+# Health check
+curl http://127.0.0.1:5000/health
+
+# Upload test (replace with actual image path)
+curl -X POST -F "image=@test.jpg" http://127.0.0.1:5000/api/upload
+
+# Dictionary lookup
+curl http://127.0.0.1:5000/api/lookup/日
+```
+
+## Deployment Considerations
+
+### Questions for Production Deployment
+
+1. **Platform Choice**
+   - Heroku (easy, free tier available)
+   - AWS/GCP/Azure (more control, scalable)
+   - DigitalOcean/Linode (simple VPS)
+   - Vercel/Netlify (static frontend + serverless functions)
+
+2. **Database**
+   - Currently file-based (uploads folder)
+   - Consider PostgreSQL for user data
+   - Redis for caching dictionary lookups
+
+3. **Storage**
+   - Local filesystem (current, simple)
+   - AWS S3 (scalable, recommended for production)
+   - Cloudinary (image optimization)
+
+4. **OCR Processing**
+   - Synchronous (current, simple but blocking)
+   - Async with Celery (better UX, more complex)
+   - External service (Google Vision API, AWS Textract)
+
+5. **Security**
+   - Add CSRF protection
+   - Implement rate limiting
+   - Add user authentication (if needed)
+   - Use HTTPS in production
+   - Secure file upload validation
+
+### Recommended Next Steps
+
+1. ✅ **Done:** Basic web app structure
+2. **Next:** Integrate real Tesseract OCR
+3. **Then:** Add Jisho API integration
+4. **After:** Deploy to Heroku/cloud platform
+5. **Finally:** Add advanced features (camera, PWA, etc.)
+
+## Contributing
+
+This is a learning project. Feel free to fork and experiment!
 
 ## License
 
 MIT License - Free to use and modify
 
-## Contributing
-
-This is a learning project. Contributions welcome!
-
 ---
 
-**Project Status:** 🚀 Planning Phase
+**Project Status:** 🟢 MVP Complete - Ready for OCR/API integration
 
 **Created:** December 19, 2025
+**Last Updated:** December 19, 2025
