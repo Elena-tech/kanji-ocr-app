@@ -39,6 +39,12 @@ def index():
     return render_template('index.html')
 
 
+@bp.route('/chat')
+def chat():
+    """Serve the Japanese chat friend page"""
+    return render_template('chat.html')
+
+
 @bp.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint for monitoring"""
@@ -346,3 +352,70 @@ def parse_jisho_response(api_response: Dict, search_term: str) -> Optional[Dict]
         'examples': examples[:5],  # Limit to 5 examples
         'source': 'Jisho.org API'
     }
+
+
+@bp.route("/api/chat", methods=["POST"])
+def chat_message():
+    """
+    Handle chat messages from the Japanese chat friend interface
+    
+    Expected: JSON with "message" field
+    Returns: JSON with "response" field
+    
+    TODO: Integrate real LLM API (OpenAI, Anthropic, etc.)
+    """
+    try:
+        data = request.get_json()
+        
+        if not data or "message" not in data:
+            return jsonify({
+                "success": False,
+                "error": "No message provided"
+            }), 400
+        
+        user_message = data["message"]
+        
+        # TODO: Call LLM API here
+        # For now, return a placeholder response
+        bot_response = generate_placeholder_response(user_message)
+        
+        return jsonify({
+            "success": True,
+            "response": bot_response,
+            "timestamp": datetime.utcnow().isoformat()
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Error in chat endpoint: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "Failed to process chat message"
+        }), 500
+
+
+def generate_placeholder_response(message: str) -> str:
+    """
+    Generate a placeholder response for chat messages
+    
+    TODO: Replace with real LLM integration
+    - Add OpenAI/Anthropic/etc. API calls
+    - Configure system prompt for Japanese practice
+    - Handle conversation context/history
+    
+    Args:
+        message: The user's message
+        
+    Returns:
+        A placeholder response in Japanese
+    """
+    # Simple placeholder responses
+    responses = [
+        f"こんにちは！「{message}」と言いましたね。",
+        f"面白いですね！「{message}」について、もっと教えてください。",
+        f"なるほど！「{message}」ですか。",
+        "すみません、今はプレースホルダーモードです。LLM APIキーを設定してください。",
+    ]
+    
+    import random
+    return random.choice(responses)
+

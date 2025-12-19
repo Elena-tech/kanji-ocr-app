@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Japanese Chat Friend - Practice Japanese with an AI language partner">
+    <title>Japanese Chat Friend - Kanji OCR</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>💬 Japanese Chat Friend</h1>
+            <p class="subtitle">Practice Japanese conversation with your AI language partner</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="app-nav">
+            <a href="/" class="nav-link">📸 Kanji OCR</a>
+            <a href="/chat" class="nav-link active">💬 Chat Friend</a>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Chat Container -->
+            <section class="chat-container">
+                <!-- Chat Messages Area -->
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Welcome message -->
+                    <div class="message bot-message">
+                        <div class="message-avatar">🤖</div>
+                        <div class="message-content">
+                            <div class="message-text">
+                                こんにちは！Japanese Chat Friendです。日本語で話しましょう！
+                            </div>
+                            <div class="message-time">Just now</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input Area -->
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <textarea
+                            id="messageInput"
+                            class="chat-input"
+                            placeholder="Type your message in Japanese or English..."
+                            rows="1"
+                        ></textarea>
+                        <button id="sendButton" class="chat-send-btn" title="Send message">
+                            <span class="send-icon">📤</span>
+                        </button>
+                    </div>
+                    <div class="chat-hints">
+                        <span class="hint">💡 Tip: Try typing in Japanese or ask for translation help</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Info Panel -->
+            <aside class="chat-info-panel">
+                <div class="info-card">
+                    <h3>📚 How to Use</h3>
+                    <ul>
+                        <li>Type your message in Japanese or English</li>
+                        <li>Press Enter or click Send</li>
+                        <li>Practice conversations naturally</li>
+                        <li>Learn from AI responses</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h3>⚙️ Status</h3>
+                    <p class="status-badge" id="chatStatus">
+                        <span class="status-dot"></span>
+                        <span>Placeholder Mode</span>
+                    </p>
+                    <p class="status-description">
+                        <strong>Note:</strong> Currently using placeholder responses.
+                        Configure LLM API key to enable real AI conversations.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3>🎯 Features (Coming Soon)</h3>
+                    <ul>
+                        <li>✅ Real-time Japanese conversation</li>
+                        <li>✅ Grammar corrections</li>
+                        <li>✅ Vocabulary suggestions</li>
+                        <li>✅ Conversation history</li>
+                        <li>✅ Export chat for review</li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Error Display -->
+            <div class="error-message" id="errorMessage" style="display: none;"></div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>
+                Japanese Chat Friend powered by LLM |
+                <a href="/">Back to Kanji OCR</a> |
+                <a href="/health" target="_blank">API Status</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>
